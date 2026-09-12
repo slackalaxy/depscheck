@@ -46,7 +46,7 @@ ask_user(){
 	local question="${1}"
     
 	# Default (empty) answer - Yes
-	read -r -p "Run: $question ? [Y/n] " response
+	read -r -p "$question [Y/n] " response
 	response=${response:-Y}
 
 	if [[ ! $response =~ ^[Yy] ]]; then
@@ -61,20 +61,22 @@ run_step(){
 	echo "Running: $step"
 }
 
-export ask_user
-export run_step
+#export ask_user
+#export run_step
 
 # 1. Update ports
 ports_up(){
 	local proceed="${1}"	
-	$proceed "ports -u"
+	$proceed "Update ports (ports -u)?"
+	
 	ports -u
 }
 
-# 2. Sync pkg-getrepo  with upstream
+# 2. Sync pkg-get repo with upstream
 pkg_get_sync(){
 	local proceed="${1}"	
-	$proceed "pkg-get sync"
+	$proceed "Sync packages repo (ports -u)?"
+	
 	rm -f $PKGDIR/*.tar.${PKGMK_COMPRESSION_MODE}
 	rm -f $PKGDIR/{PKGDEPS,PKGINST,PKGREAD,PKGREPO}
 	pkg-get sync
@@ -83,9 +85,10 @@ pkg_get_sync(){
 # 3. Remve orphaned ports
 orphan_remove(){
 	local proceed="${1}"
+	$proceed "Search/remove orphaned packages?"
+	
 	removed=($(prtorphan))
 	if (( ${#removed[@]} > 0 )); then
-    		$proceed "prt-get remove $removed"
     		echo "=======> Remove orphaned pkgs."
     	prt-get remove $removed
 	else
@@ -97,9 +100,10 @@ orphan_remove(){
 # 4. Install missing deps
 install_missing(){
 	local proceed="${1}"
+	$proceed "Search/install missing dependencies?"
+
 	missing=($(missdeps))
 	if (( ${#missing[@]} > 0 )); then
-    		$proceed "pkg-get depinst $missing"
     		echo "=======> Install missing deps."
     		pkg-get depinst $missing
 	else
@@ -110,23 +114,27 @@ install_missing(){
 # 5. Show what will be updated
 pkg_get_diff(){
 	local proceed="${1}"
-	$proceed "pkg-get diff"
+	$proceed "Show updates (pkg-get diff)?"
+	
 	pkg-get diff
 }
 
 # 6. Update the system via pkg-get not prt-get
 pkg_get_sysup(){
 	local proceed="${1}"
-	$proceed "pkg-get sysup"
+	$proceed "Update system (pkg-get sysup)?"
+	
 	pkg-get sysup
 }
 
 # 7. Reinstall necessary packages after a revdep check
 reinstall_revdep(){
 	local proceed="${1}"
+	$proceed "Reinstall anything reported by revdep?"
+	
+	echo "===== Running revdep."
 	revdeps=($(revdep))
 	if (( ${#revdeps[@]} > 0 )); then
-		$proceed "pkg-get update $revdeps -fr"
 		echo "=======> Reinstall rebuilt pkgs."
 		pkg-get update $revdeps -fr
 	else
