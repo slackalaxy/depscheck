@@ -8,6 +8,10 @@ List port's dependencies as a row.
 
 Output dependencies found by `finddeps` as a single row, suitable for the "\# Depends on:" line in the Pkgfile. Dependencies from core are omitted. The wrapper also checks if any libs are missing by calling `revdep`.
 
+## lsopt
+
+This script simply list the optional dependencies for a port.
+
 ## missdeps
 
 Check for missing deps of all packages that are installed.
@@ -31,13 +35,23 @@ missdeps -v
 [d] util-linux
 ```
 
-## lsopt
+## pkg-sync
+This is meant for systems managed by [pkg-get](https://crux.nu/portdb/?a=search&q=pkg-get) to install prebuilt packages. The script aims to automate the following steps:
+1. Update ports, by simply calling `ports -u`.
+2. Sync pkg-get repo with upstream. This will clean the repo local folder first. Its location is parsed from `/etc/pkg-get.conf`.
+3. Remove orphaned ports, reported by `prtorphan`.
+4. Install missing deps, reported by `missdeps`.
+5. Show what will be updated by `pkg-get diff`.
+6. Update the system using the packages repo (`pkg-get sysup`).
+7. Reinstall necessary packages after a `revdep` check.
 
-This script simply list the optional dependencies for a port.
+By default, `pkg-sync` promts at each step. Parsing the `-a, --auto` option will run all steps without prompting.
+
+Note that `pkg-get` should be set up first!
 
 ## pkg-diff
 
-This is meant for systems managed by [pkg-get](https://crux.nu/portdb/?a=search&q=pkg-get) to install prebuilt packages. A `pkg-get sync` is only aware of packages with changed version/release, but will not notice those that have been rebuilt, for example after a `revdep` report for missing libraries.
+This is also meant for systems managed by [pkg-get](https://crux.nu/portdb/?a=search&q=pkg-get) to install prebuilt packages (at some point I may merge the two tools). A `pkg-get sync` is only aware of packages with changed version/release, but will not notice those that have been rebuilt, for example after a `revdep` report for missing libraries.
 
 The tool compares a freshly synced PKGREPO file with a previous copy, that represents the packages currently installed (or should). The `pkg-diff` script will output the differences between installed packages found in both. It will distinguish between packages with a changed version/release and those that differ only in their .md5sum, for examaple after a rebuild.
 
