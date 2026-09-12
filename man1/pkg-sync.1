@@ -1,0 +1,59 @@
+.\" 
+.\" pkg\-sync manual page.
+.\" (C) 2026 by Petar Petrov <slackalaxy@gmail.com> 
+.\"
+.TH pkg\-sync 1
+.SH NAME
+pkg\-sync \- Automate system update from a packages repo (pkg-get).
+.SH SYNOPSIS
+.PP
+.B pkg\-sync
+
+.SH DESCRIPTION
+The \fBpkg\-sync\fP script aims to automate the following steps:
+.IP 1.
+Update ports, by simply calling \fBports -u\fP.
+.IP 2.
+Sync \fBpkg\-get\fP repo with upstream. This will clean the repo local
+folder first. Its location is parsed from \fB/etc/pkg-get.conf\fP.
+.IP 3.
+Remove orphaned ports, reported by \fBprtorphan\fP.
+.IP 4.
+Install missing deps, reported by \fBmissdeps\fP.
+.IP 5.
+Show what will be updated by \fBpkg\-get diff\fP.
+.IP 6.
+Update the system using the packages repo (\fBpkg\-get sysup\fP).
+.IP 7.
+Reinstall necessary packages after a \fBrevdep\fP check.
+
+.SH OPTIONS
+.TP
+.B "\-a, \-\-auto"
+Automatically run all steps, without promting.
+.TP
+.B "\-h, \-\-help"
+Print help and exit.
+.SH EXAMPLES
+.PP
+Run the script with the series of prompts:
+
+.B
+pkg\-sync
+.fam T
+.fi
+
+.PP
+Run all steps without prompting:
+
+.B
+pkg\-sync -a
+.fam T
+.fi
+
+.SH SEE ALSO
+\fBports\fP(8), \fBpkg\-get\fP(8), \fBprt\-get\fP(8), \fBrevdep\fP(1), \fBprtorphan\fP(1), \fBmissdeps\fP(1)
+
+.SH AUTHOR
+
+\fBpkg\-sync\fP was written by Petar Petrov <slackalaxy@gmail.com> for CRUX.
