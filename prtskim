@@ -14,7 +14,7 @@ fi
 # no options with the tool
 for t in "$@"; do
   if [ "${t:0:1}" = "-" ]; then
-    echo -e "Invalid input $t. Usage: $(basename $0) [package...]"
+    echo -e "Invalid input $t. Usage: $(basename $0) [port...]"
     exit 1
   fi
 done
@@ -22,6 +22,7 @@ done
 for i in "$@"; do
   if [[ -d $i ]]; then
       if [ -f $i/Pkgfile ]; then
+	#pkgmk -do
         prtwash $i
         cd $i
         rm -rf .md5sum
