@@ -7,59 +7,70 @@
 #
 # Petar Petrov, slackalaxy at gmail dot com
 
-# Input option is invalid
-if [[ "$1" != "" ]] && [[ "$1" != "-l" ]] && [[ "$1" != "--list" ]] && [[ "$1" != "-h" ]] && [[ "$1" != "--help" ]]; then
-	echo "$(basename $0): invalid option $1"
-	exit 1
+# Invalid option
+if [[ -n "${1:-}" ]] && [[ "$1" != "-v" ]] && [[ "$1" != "--verbose" ]] && [[ "$1" != "-h" ]] && [[ "$1" != "--help" ]]; then
+    echo "$(basename "$0"): invalid option '$1'" >&2
+    exit 1
 fi
 
-missing=$(prt-get listinst | xargs prt-get depends | grep "\[ \]" | sed "s:\[ \] ::g")
-misspkg=$(prt-get listinst | xargs prt-get depends | grep "\-- missing packages")
-
-# Print help
-if [[ "$1" = "-h" ]] || [[ "$1" = "--help" ]]; then
+show_help() {
 	echo "usage: $(basename $0) [option]"
 	echo "options:"
-	echo "  -l,   --list            list missing"
-	echo "  -h,   --help            print help and exit"
+	echo "  -v,  --verbose   verbose output"
+	echo "  -h,  --help      print help and exit"
+	exit 0
+}
+
+if [[ "$1" == "-h" ]] || [[ "$1" == "--help" ]]; then
+    show_help
+fi
+
+# Get depends data
+depends=$(prt-get listinst | xargs prt-get depends 2>/dev/null || true)
+missing=$(echo "$depends" | grep '\[ \]' | sed 's:\[ \] ::g' | sort -u)
+#misspkg=$(echo "$depends" | grep -c '\-- missing packages' || true)
+
+if [[ "$1" = "-v" ]] || [[ "$1" = "--verbose" ]]; then
+	
+	#if [ -z "$missing" ] && [ -z "$misspkg" ]; then
+	if [ -z "$missing" ]; then
+		echo "** no missing deps"
+		exit 0
+	fi
+
+	# Report missing dependencies...
+	echo "-- ([ ] missing deps, [d] = dependents)"
+	deps=""
+	for m in ${missing[@]}; do
+		echo -e "[ ] $m"
+		dependents=$(prt-get dependent $m)
+	  
+	  	# ... and find their immediate dependents
+		for d in ${dependents[@]}; do
+		deps+=$(echo "$d ")
+	done
+	  
+	done
+
+	# Remove repetitive dependents
+	norep=$(echo -e "${deps[@]}" | sed "s: :\n:g" | sort -u | tr '\n' ' ')
+
+	# Print the dependents
+	for n in ${norep[@]}; do
+	  echo -e "[d] $n"
+	done
+	
 	exit 0
 fi
 
-if [[ "$1" = "-l" ]] || [[ "$1" = "--list" ]]; then
-	prt-get listinst | xargs prt-get depends | grep "\[ \]" | sed "s:\[ \] ::g"
+if [ -z "$missing" ]; then
 	exit 0
 fi
 
-if [ -z "$missing" ] && [ -z "$misspkg" ]; then
-    echo "** no missing deps"
-    exit 0
-else
-    echo "** checking for missing deps"
-    echo "-- ([ ] missing, [i] = installed dependents)"
-fi
+prt-get listinst | xargs prt-get depends | grep "\[ \]" | sed "s:\[ \] ::g"
+exit 0
 
-# Report missing dependencies...
-deps=""
-for m in ${missing[@]}; do
-  echo -e "[ ] $m"
-  dependents=$(prt-get dependent $m)
-  
-  # ... and find their immediate dependents
-  for d in ${dependents[@]}; do
-    deps+=$(echo "$d ")
-  done
-  
-done
-
-# Remove repetitive dependents
-norep=$(echo -e "${deps[@]}" | sed "s: :\n:g" | sort -u | tr '\n' ' ')
-
-# Print the dependents
-for n in ${norep[@]}; do
-  echo -e "[i] $n"
-done 
-
-# are there missing deps that have no ports?
-if [ ! -z "$misspkg" ]; then
-  prt-get listinst | xargs prt-get depends | grep -v "\["
-fi
+# are there missing deps that have no ports? Comment out, that's redundant with prtorphan
+#if [ ! -z "$misspkg" ]; then
+#  prt-get listinst | xargs prt-get depends | grep -v "\["
+#fi
