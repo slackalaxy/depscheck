@@ -20,42 +20,41 @@ there are there missing deps that have no ports.
 no options available
 
 .SH EXAMPLES
+.PP
+Display dependencies that are missing from the system as a list:
+
 .B
 missdeps
-.PP
-displays dependencies that are missing from the system, and the installed
-packages, that directly depend on them:
-
-.PP
-.nf
-.fam C
-** checking for missing deps
--- ([ ] missing, [i] = installed dependents)
-[ ] eudev
-[ ] sqlite3
-[i] apr-util
-[i] dhcpcd
-[i] libinput
-[i] libusb
-[i] nss
-[i] openmpi
-[i] pciutils
-[i] python3
-[i] util-linux
-.fam T
-.fi
-
-.B
-missdeps -l
-.PP
-displays dependencies that are missing from the system as a list:
-
 .PP
 .nf
 .fam C
 eudev
 sqlite3
+.fam T
+.fi
 
+.PP
+Display dependencies that are missing from the system, and the installed
+package(s), dependent on them:
+
+.B
+missdeps -v
+
+.PP
+.nf
+.fam C
+-- ([ ] missing deps, [d] = dependents)
+[ ] eudev
+[ ] sqlite3
+[d] apr-util
+[d] dhcpcd
+[d] libinput
+[d] libusb
+[d] nss
+[d] openmpi
+[d] pciutils
+[d] python3
+[d] util-linux
 .fam T
 .fi
 
