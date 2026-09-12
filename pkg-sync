@@ -75,7 +75,7 @@ ports_up(){
 # 2. Sync pkg-get repo with upstream
 pkg_get_sync(){
 	local proceed="${1}"	
-	$proceed "Sync packages repo (ports -u)?"
+	$proceed "Sync packages repo (pkg-get sync)?"
 	
 	rm -f $PKGDIR/*.tar.${PKGMK_COMPRESSION_MODE}
 	rm -f $PKGDIR/{PKGDEPS,PKGINST,PKGREAD,PKGREPO}
